@@ -25,7 +25,6 @@ const circulacion = {
         },
     }
 }
-console.log(circulacion)
 
 const festividades = [
     { "fecha": "2023-01-01", "descripcion": "Año Nuevo" },
@@ -43,34 +42,92 @@ const festividades = [
 class Via {
     constructor(direccionNorte) {
         this.densidadVehicular = 0
+        this.embotellamientos = 0
+        this.aperturas = 0
         if (direccionNorte) {
             this.direccion = "Norte"
         } else if (!direccionNorte) {
             this.direccion = "Sur"
         }
     }
-    variarDensidad(minimo, maximo, festivo) {
+    variarDensidad(minimo, maximo, festivo, aerea) {
         if (!festivo) {
-            this.densidadVehicular = Math.floor((Math.random() * maximo) + minimo);
+            const densidadAleatoria = random(minimo, maximo);
+            if (this.direccion == aerea.direccion) {
+                this.densidadVehicular = densidadAleatoria*0.6
+                aerea.densidadVehicular = densidadAleatoria*0.4
+            } else {
+                this.densidadVehicular = densidadAleatoria
+            }
         } else {
             // Cuando el día sea festivo (festivo es un boolean), se debería correr este código acá instead
-            this.densidadVehicular = Math.floor((Math.random() * maximo) + 125);
+            this.densidadVehicular = random(tope, maximo)
         }
+    }
+    entrarHoraPico(unixTimestamp) {
+        const direccion = this.direccion == "Norte" ? "norteSur" : "surNorte"
+        const fecha = new Date(unixTimestamp * 1000);
+
+        // Día hábil o fin de semana
+        const diaDeLaSemana = fecha.getDay();
+        const esFinDeSemana = diaDeLaSemana === 0 || diaDeLaSemana === 6;
+        const tipoDia = esFinDeSemana ? "finDeSemana" : "diasHabiles";
+
+        // Hora y minutos de la fecha
+        const horaActual = fecha.getHours();
+        const minutosActuales = fecha.getMinutes();
+        const totalMinutosActuales = horaActual * 60 + minutosActuales;
+
+        for (const rango in circulacion[direccion][tipoDia]) {
+            const [horaInicio, horaFin, valor] = circulacion[direccion][tipoDia][rango];
+
+            const [horaInicioH, horaInicioM] = horaInicio.split(':').map(Number);
+            const [horaFinH, horaFinM] = horaFin.split(':').map(Number);
+            const totalMinutosInicio = horaInicioH * 60 + horaInicioM;
+            const totalMinutosFin = horaFinH * 60 + horaFinM;
+
+            if (totalMinutosActuales >= totalMinutosInicio && totalMinutosActuales <= totalMinutosFin) {
+                return valor;
+            }
+        }
+        return 1;
+    }
+    contarApertura(){
+        this.aperturas++
+    }
+    revisarEmbotellamiento(){
+        if(this.densidadVehicular>=tope){
+            this.embotellamientos++
+        }
+    }
+    reportes(){
+        return {embotellamientos: this.embotellamientos, aperturas: this.aperturas}
     }
 }
 
 class Aerea {
     constructor() {
         this.cooldown = 7200
+        this.direccion = ""
     }
     escogerDireccion(via) {
-        if (this.cooldown >= 7200) {
+        if (this.cooldown >= 7200 && this.direccion != via.direccion) {
+            this.cooldown = 0
             this.direccion = via.direccion
+            via.contarApertura()
         }
     }
-    vaciar(via) {
-        if (this.direccion == via.direccion) {
-            via.densidadVehicular = via.densidadVehicular / 2
-        }
+    enfriar(tiempo){
+        this.cooldown += tiempo
     }
+    // vaciar(via) {
+    //     if (this.direccion == via.direccion) {
+    //         console.log("Vaciando en direccion: " + this.direccion)
+    //         via.densidadVehicular = via.densidadVehicular / 2
+    //     }
+    // }
+}
+
+function random(min, max) {
+    return Math.floor((Math.random() * (max - min + 1)) + min);
 }
