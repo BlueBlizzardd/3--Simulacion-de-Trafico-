@@ -1,4 +1,5 @@
-const tope = 125
+const tope = 125;
+
 const circulacion = {
     "norteSur": {
         "diasHabiles": {
@@ -24,21 +25,9 @@ const circulacion = {
             "noche": ["09:30", "20:00", 54]
         },
     }
-}
-console.log(circulacion)
+};
 
-const festividades = [
-    { "fecha": "2023-01-01", "descripcion": "Año Nuevo" },
-    { "fecha": "2023-04-19", "descripcion": "Declaración de la Independencia" },
-    { "fecha": "2023-05-01", "descripcion": "Día del Trabajo" },
-    { "fecha": "2023-06-24", "descripcion": "Batalla de Carabobo" },
-    { "fecha": "2023-07-05", "descripcion": "Día de la Independencia" },
-    { "fecha": "2023-07-24", "descripcion": "Natalicio de Simón Bolívar" },
-    { "fecha": "2023-10-12", "descripcion": "Día de la Resistencia Indígena" },
-    { "fecha": "2023-12-24", "descripcion": "Víspera de Navidad" },
-    { "fecha": "2023-12-25", "descripcion": "Navidad" },
-    { "fecha": "2023-12-31", "descripcion": "Fiesta de Fin de Año" }
-]
+console.log(circulacion);
 
 class Via {
     constructor(direccionNorte) {
@@ -57,7 +46,7 @@ class Via {
             this.densidadVehicular = Math.floor((Math.random() * maximo) + 125);
         }
     }
-}
+};
 
 class Aerea {
     constructor() {
@@ -73,4 +62,4 @@ class Aerea {
             via.densidadVehicular = via.densidadVehicular / 2
         }
     }
-}
+};
