@@ -41,13 +41,13 @@ class Via {
         if (!festivo) {
             const densidadAleatoria = random(minimo, maximo);
             if (this.direccion == aerea.direccion) {
-                this.densidadVehicular = densidadAleatoria*0.6
-                aerea.densidadVehicular = densidadAleatoria*0.4
+                this.densidadVehicular = densidadAleatoria * 0.6
+                aerea.densidadVehicular = densidadAleatoria * 0.4
             } else {
                 this.densidadVehicular = densidadAleatoria
             }
         } else {
-            // Cuando el día sea festivo (festivo es un boolean), se debería correr este código acá instead
+            console.log(festivo)
             this.densidadVehicular = random(tope, maximo)
         }
     }
@@ -79,40 +79,43 @@ class Via {
         }
         return 1;
     }
-    contarApertura(){
+    contarApertura() {
         this.aperturas++
     }
-    revisarEmbotellamiento(){
-        if(this.densidadVehicular>=tope){
+    revisarEmbotellamiento() {
+        if (this.densidadVehicular >= tope) {
             this.embotellamientos++
         }
     }
-    reportes(){
-        return {embotellamientos: this.embotellamientos, aperturas: this.aperturas}
+    reportesFinales() {
+        return { embotellamientos: this.embotellamientos, aperturas: this.aperturas }
     }
 }
 
 class Aerea {
     constructor() {
         this.cooldown = 7200
-        this.direccion = ""
+        this.direccion = "Cerrada"
+        this.densidadVehicular = 0
+        this.proximaDireccion = "Norte"
     }
     escogerDireccion(via) {
-        if (this.cooldown >= 7200 && this.direccion != via.direccion) {
-            this.cooldown = 0
-            this.direccion = via.direccion
+        if (this.direccion != via.direccion) {
+            if (this.direccion != "Cambiando") {
+                this.cooldown = 0
+                this.densidadVehicular = 0
+                this.proximaDireccion = via.direccion
+            }
+            this.direccion = "Cambiando"
             via.contarApertura()
         }
     }
-    enfriar(tiempo){
+    enfriar(tiempo) {
         this.cooldown += tiempo
+        if (this.cooldown >= 7200) {
+            this.direccion = this.proximaDireccion
+        }
     }
-    // vaciar(via) {
-    //     if (this.direccion == via.direccion) {
-    //         console.log("Vaciando en direccion: " + this.direccion)
-    //         via.densidadVehicular = via.densidadVehicular / 2
-    //     }
-    // }
 }
 
 function random(min, max) {

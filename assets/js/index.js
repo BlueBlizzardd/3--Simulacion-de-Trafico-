@@ -1,5 +1,5 @@
 const start = document.querySelector('.btn-start');
-const [densidadActual, viaArea, resFinal, timeCheck, mensajeFestivo] = ["densidadActual", "viaAerea", "resultadoFinal", "ritmo", "mensaje"].map((el) => { return document.getElementById(el) })
+const [densidadActual, viaArea, resFinal, timeCheck, mensajeFestivo] = ["densidadActual", "viaAerea", "resultadoFinal", "ritmo", "mensajeFestivo"].map((el) => { return document.getElementById(el) })
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
 start.addEventListener('click', async () => {
@@ -20,7 +20,8 @@ start.addEventListener('click', async () => {
             this.time += timeStep
         },
         isHoliday(holiday) {
-            const date = new Date(this.time);
+            const date = new Date(this.time * 1000);
+            console.log(date.toDateString().includes(holiday))
             if (date.toDateString().includes(holiday)) return true;
             else return false;
         }
@@ -49,7 +50,8 @@ start.addEventListener('click', async () => {
         for (holiday of festividades) {
             festividad = date.isHoliday(holiday.fecha)
             if (festividad) {
-                mensajeFestivo.innerText = holyday.descripcion
+                mensajeFestivo.innerText = "¡Feliz " + holiday.descripcion + "!"
+                break
             }
         }
 
@@ -57,16 +59,38 @@ start.addEventListener('click', async () => {
         viaSN.variarDensidad(viaSN.entrarHoraPico(date.time), 125, festividad, aerea)
         viaNS.revisarEmbotellamiento()
         viaSN.revisarEmbotellamiento()
+        const htmlDensidad = `
+            <p>
+                La densidad actual en la vía con dirección al ${viaNS.direccion} es ${viaNS.densidadVehicular}
+            </p>
+            <p>
+                La densidad actual en la vía con dirección al ${viaSN.direccion} es ${viaSN.densidadVehicular}
+            </p>
+                `
+
+        densidadActual.innerHTML = htmlDensidad
+
+        const preparacionAerea = (aerea.direccion == "Cambiando") ? `La vía aérea está cambiando de dirección y lleva ${aerea.cooldown / 60}m.` : "La vía aérea está abierta."
+        const htmlAerea = `
+            <p> Dirección actual de la vía aérea: ${aerea.direccion}</p>
+            <p> Densidad actual en la vía aérea: ${aerea.densidadVehicular}</p>
+            <p> ${preparacionAerea} </p>
+        `
+        viaArea.innerHTML = htmlAerea
+
         if (viaNS.densidadVehicular >= 125) {
             aerea.escogerDireccion(viaNS)
         } else if (viaSN.densidadVehicular >= 125) {
             aerea.escogerDireccion(viaSN)
         }
+        if (timeCheck.checked) {
+            await sleep(250)
+        }
         date.forwardStep();
         aerea.enfriar(timeStep)
     }
 
-    const [reporteNS, reporteSN] = [viaNS, viaSN].map((el) => { return el.reportes() })
+    const [reporteNS, reporteSN] = [viaNS, viaSN].map((el) => { return el.reportesFinales() })
     const htmlReporte = `
         <p>Embotellamientos en vía con dirección al ${viaSN.direccion}: ${reporteSN.embotellamientos}</p>
         <p>Veces que se abrió la vía aérea con dirección al: ${viaSN.direccion}: ${reporteSN.aperturas}</p>
@@ -74,7 +98,4 @@ start.addEventListener('click', async () => {
         <p>Veces que se abrió la vía aérea con dirección al: ${viaNS.direccion}: ${reporteNS.aperturas}</p>
     `
     resFinal.innerHTML = htmlReporte
-    if (timeCheck.checked) {
-        await sleep(250)
-    }
 })
