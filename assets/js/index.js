@@ -1,5 +1,5 @@
 const start = document.querySelector('.btn-start');
-const [densidadActual, viaArea, resFinal, timeCheck] = ["densidadActual", "viaAerea", "resultadoFinal", "ritmo"].map((el) => { return document.getElementById(el) })
+const [densidadActual, viaArea, resFinal, timeCheck, mensajeFestivo] = ["densidadActual", "viaAerea", "resultadoFinal", "ritmo", "mensaje"].map((el) => { return document.getElementById(el) })
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
 start.addEventListener('click', async () => {
@@ -18,8 +18,25 @@ start.addEventListener('click', async () => {
         },
         forwardStep() {
             this.time += timeStep
+        },
+        isHoliday(holiday) {
+            const date = new Date(this.time);
+            if (date.toDateString().includes(holiday)) return true;
+            else return false;
         }
     }
+    const festividades = [
+        { "fecha": "Jan 01", "descripcion": "Año Nuevo" },
+        { "fecha": "Apr 19", "descripcion": "Declaración de la Independencia" },
+        { "fecha": "May 01", "descripcion": "Día del Trabajo" },
+        { "fecha": "Jun 24", "descripcion": "Batalla de Carabobo" },
+        { "fecha": "Jul 05", "descripcion": "Día de la Independencia" },
+        { "fecha": "Jul 24", "descripcion": "Natalicio de Simón Bolívar" },
+        { "fecha": "Oct 12", "descripcion": "Día de la Resistencia Indígena" },
+        { "fecha": "Dec 24", "descripcion": "Víspera de Navidad" },
+        { "fecha": "Dec 25", "descripcion": "Navidad" },
+        { "fecha": "Dec 31", "descripcion": "Fiesta de Fin de Año" }
+    ];
 
     const endDate = new Date(document.getElementById('endDate').value).getTime() / 1000
 
@@ -27,14 +44,17 @@ start.addEventListener('click', async () => {
     const viaSN = new Via(true)
     const aerea = new Aerea()
 
-    let i = 0
     while (date.time < endDate) {
-        // console.log(aerea.cooldown)
-        // console.log(vecesAbiertaN, vecesAbiertaS)
-        //añadir código que verifique si la fecha es festivo
+        let festividad = false
+        for (holiday of festividades) {
+            festividad = date.isHoliday(holiday.fecha)
+            if (festividad) {
+                mensajeFestivo.innerText = holyday.descripcion
+            }
+        }
 
-        viaNS.variarDensidad(viaNS.entrarHoraPico(date.time), 125, false, aerea)
-        viaSN.variarDensidad(viaSN.entrarHoraPico(date.time), 125, false, aerea)
+        viaNS.variarDensidad(viaNS.entrarHoraPico(date.time), 125, festividad, aerea)
+        viaSN.variarDensidad(viaSN.entrarHoraPico(date.time), 125, festividad, aerea)
         viaNS.revisarEmbotellamiento()
         viaSN.revisarEmbotellamiento()
         if (viaNS.densidadVehicular >= 125) {
@@ -42,6 +62,8 @@ start.addEventListener('click', async () => {
         } else if (viaSN.densidadVehicular >= 125) {
             aerea.escogerDireccion(viaSN)
         }
+        date.forwardStep();
+        aerea.enfriar(timeStep)
     }
 
     const [reporteNS, reporteSN] = [viaNS, viaSN].map((el) => { return el.reportes() })
@@ -52,9 +74,7 @@ start.addEventListener('click', async () => {
         <p>Veces que se abrió la vía aérea con dirección al: ${viaNS.direccion}: ${reporteNS.aperturas}</p>
     `
     resFinal.innerHTML = htmlReporte
-    if(timeCheck.value){
+    if (timeCheck.checked) {
         await sleep(250)
     }
-    date.forwardStep();
-    aerea.enfriar(timeStep)
 })
