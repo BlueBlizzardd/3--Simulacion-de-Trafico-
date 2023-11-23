@@ -65,11 +65,12 @@ start.addEventListener('click', async () => {
                 aerea.escogerDireccion(viaSN)
             }
             date.forwardStep();
-            aerea.enfriar(timeStep)
+            aerea.enfriar(date.timeStep);
         }
 
         const [reporteNS, reporteSN] = [viaNS, viaSN].map((el) => { return el.reportes() })
         const htmlReporte = `
+            <p>Simulacion hecha en: ${new Date().toLocaleString('es-US')}</p>
             <p>Embotellamientos en vía con dirección al ${viaSN.direccion}: ${reporteSN.embotellamientos}</p>
             <p>Veces que se abrió la vía aérea con dirección al: ${viaSN.direccion}: ${reporteSN.aperturas}</p>
             <p>Embotellamientos en vía con dirección al: ${viaNS.direccion}: ${reporteNS.embotellamientos}</p>
